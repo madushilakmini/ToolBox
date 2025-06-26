@@ -20,12 +20,20 @@ function Login() {
         password,
       });
 
-      if (res.data.token) {
+      if (res.data.token && res.data.role) {
         localStorage.setItem('token', res.data.token);
+        localStorage.setItem('role', res.data.role);
+        localStorage.setItem('email', res.data.email); // optional
+
         alert('Login successful!');
-        navigate('/');
+
+        if (res.data.role === 'ADMIN') {
+          navigate('/dashboard');
+        } else {
+          navigate('/');
+        }
       } else {
-        setErrorMessage('Login failed: No token received');
+        setErrorMessage('Login failed: Invalid response from server');
       }
     } catch (err) {
       setErrorMessage(err.response?.data?.message || 'Login failed');

@@ -23,10 +23,13 @@ public class AuthController {
     public ResponseEntity<Map<String, String>> login(@RequestBody LoginRequest request) {
         User user = userService.authenticate(request.getEmail(), request.getPassword());
         if (user != null) {
-            String token = JwtUtil.generateToken(user.getEmail());
+            // Include role in token
+            String token = JwtUtil.generateToken(user.getEmail(), user.getRole().name());
 
             Map<String, String> response = new HashMap<>();
             response.put("token", token);
+            response.put("role", user.getRole().name());
+            response.put("email", user.getEmail());
             return ResponseEntity.ok(response);
         } else {
             Map<String, String> error = new HashMap<>();
@@ -45,8 +48,7 @@ public class AuthController {
         private String email;
         private String password;
 
-        // getters and setters
-
+        // Getters and Setters
         public String getEmail() {
             return email;
         }
