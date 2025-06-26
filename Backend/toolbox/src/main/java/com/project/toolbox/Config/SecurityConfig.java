@@ -5,15 +5,10 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.config.http.SessionCreationPolicy;
 
 @Configuration
 public class SecurityConfig {
-
-    // Inject your JWT filter if you're using one (example: JwtAuthFilter)
-    // @Autowired
-    // private JwtAuthFilter jwtAuthFilter;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -22,18 +17,32 @@ public class SecurityConfig {
             .and()
             .csrf().disable()
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                // Allow login and register without authentication
                 .requestMatchers("/api/auth/register", "/api/auth/login").permitAll()
-                .requestMatchers(HttpMethod.GET, "/api/tools/getTools").permitAll()
-                .requestMatchers("/api/payment/**", "/api/rental/**", "/api/tools/**").permitAll()
+
+                // Allow GET requests for tools (list, search, by id)
+                .requestMatchers(HttpMethod.GET, "/api/tools/**").permitAll()
+
+                // Allow POST to add tools
+                .requestMatchers(HttpMethod.POST, "/api/tools/add").permitAll()
+
+                // Allow PUT to update tools
+                .requestMatchers(HttpMethod.PUT, "/api/tools/update/**").permitAll()
+
+                // Allow DELETE to delete tools
+                .requestMatchers(HttpMethod.DELETE, "/api/tools/delete/**").permitAll()
+
+                // Allow rental and payment for now (optional)
+                .requestMatchers("/api/payment/**", "/api/rental/**").permitAll()
+
+                // Protect user profile (authenticated only)
                 .requestMatchers("/api/user/profile").authenticated()
+
+                // All other requests need authentication
                 .anyRequest().authenticated()
             )
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            .httpBasic(); // Optional: replace with JWT filter if using tokens
-
-        // If using JWT, add this line:
-        // http.addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+            .httpBasic(); // You can replace this with JWT if needed later
 
         return http.build();
     }

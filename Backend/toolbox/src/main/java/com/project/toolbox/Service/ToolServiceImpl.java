@@ -27,4 +27,14 @@ public class ToolServiceImpl implements ToolService {
     public List<Tool> searchTools(String keyword) {
         return toolRepository.findByNameContainingIgnoreCase(keyword);
     }
+
+    @Override
+    public Tool saveTool(Tool tool) {
+        return toolRepository.save(tool);
+    }
+
+    @Override
+    public void deleteTool(Long id) {
+        toolRepository.deleteById(id);
+    }
 }
