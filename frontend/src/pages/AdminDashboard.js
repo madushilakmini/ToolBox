@@ -46,28 +46,23 @@ const AdminDashboard = () => {
       quantity: parseInt(formData.quantity),
     };
 
-    if (isEditing) {
-      axios.put(`${apiUrl}/update/${formData.id}`, data)
-        .then(() => {
-          alert("Tool updated successfully!");
-          resetForm();
-          fetchTools();
-        })
-        .catch(() => alert("Update failed"));
-    } else {
-      axios.post(`${apiUrl}/add`, data)
-        .then(() => {
-          alert("Tool added successfully!");
-          resetForm();
-          fetchTools();
-        })
-        .catch(() => alert("Add failed"));
-    }
+    const request = isEditing
+      ? axios.put(`${apiUrl}/update/${formData.id}`, data)
+      : axios.post(`${apiUrl}/add`, data);
+
+    request
+      .then(() => {
+        alert(`Tool ${isEditing ? 'updated' : 'added'} successfully!`);
+        resetForm();
+        fetchTools();
+      })
+      .catch(() => alert(`${isEditing ? 'Update' : 'Add'} failed`));
   };
 
   const handleEdit = (tool) => {
     setFormData(tool);
     setIsEditing(true);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleDelete = (id) => {
@@ -104,68 +99,98 @@ const AdminDashboard = () => {
   };
 
   return (
-    <div style={{ padding: '20px' }}>
-      <h1>Admin Tool Management</h1>
+    <div style={{ padding: '40px', fontFamily: 'Segoe UI, sans-serif' }}>
+      <h1 style={{ textAlign: 'center', color: '#333' }}>🛠️ Admin Tool Management</h1>
 
       {/* Tool Form */}
-      <form onSubmit={handleSubmit} style={{ display: 'grid', gap: '10px', maxWidth: '500px', marginBottom: '30px' }}>
-        <input name="name" placeholder="Name" value={formData.name} onChange={handleChange} required />
-        <input name="category" placeholder="Category" value={formData.category} onChange={handleChange} required />
-        <textarea name="description" placeholder="Description" value={formData.description} onChange={handleChange} required />
-        <input name="imageUrl" placeholder="Image URL" value={formData.imageUrl} onChange={handleChange} required />
-        <input name="pricePerDay" type="number" placeholder="Price per Day" value={formData.pricePerDay} onChange={handleChange} required />
-        <input name="pricePerWeek" type="number" placeholder="Price per Week" value={formData.pricePerWeek} onChange={handleChange} required />
-        <input name="quantity" type="number" placeholder="Quantity" value={formData.quantity} onChange={handleChange} required />
-        <label>
-          Available:
-          <input type="checkbox" name="isAvailable" checked={formData.isAvailable} onChange={handleChange} />
-        </label>
-        <button type="submit" style={{ backgroundColor: '#282c34', color: 'white', padding: '10px' }}>
-          {isEditing ? 'Update Tool' : 'Add Tool'}
-        </button>
-        {isEditing && <button onClick={resetForm} type="button">Cancel Edit</button>}
-      </form>
+      <div style={{
+        backgroundColor: '#f9f9f9',
+        padding: '20px',
+        borderRadius: '10px',
+        maxWidth: '600px',
+        margin: '30px auto',
+        boxShadow: '0 0 10px rgba(0,0,0,0.1)'
+      }}>
+        <h2>{isEditing ? '✏️ Edit Tool' : '➕ Add New Tool'}</h2>
+        <form onSubmit={handleSubmit} style={{ display: 'grid', gap: '10px' }}>
+          <input name="name" placeholder="Name" value={formData.name} onChange={handleChange} required />
+          <input name="category" placeholder="Category" value={formData.category} onChange={handleChange} required />
+          <textarea name="description" placeholder="Description" value={formData.description} onChange={handleChange} required />
+          <input name="imageUrl" placeholder="Image URL" value={formData.imageUrl} onChange={handleChange} required />
+          <input name="pricePerDay" type="number" placeholder="Price per Day" value={formData.pricePerDay} onChange={handleChange} required />
+          <input name="pricePerWeek" type="number" placeholder="Price per Week" value={formData.pricePerWeek} onChange={handleChange} required />
+          <input name="quantity" type="number" placeholder="Quantity" value={formData.quantity} onChange={handleChange} required />
+          <label>
+            <input type="checkbox" name="isAvailable" checked={formData.isAvailable} onChange={handleChange} />
+            {' '}Available
+          </label>
+          <div>
+            <button type="submit" style={{ backgroundColor: isEditing ? '#007bff' : '#28a745', color: 'white', padding: '10px', border: 'none', borderRadius: '5px' }}>
+              {isEditing ? 'Update Tool' : 'Add Tool'}
+            </button>
+            {isEditing &&
+              <button type="button" onClick={resetForm} style={{ marginLeft: '10px', backgroundColor: '#6c757d', color: 'white', padding: '10px', border: 'none', borderRadius: '5px' }}>
+                Cancel
+              </button>
+            }
+          </div>
+        </form>
+      </div>
 
       {/* Search bar */}
-      <div style={{ marginBottom: '20px' }}>
+      <div style={{ textAlign: 'center', marginBottom: '20px' }}>
         <input
-          placeholder="Search tool name"
+          placeholder="🔍 Search tool name"
           value={searchKeyword}
           onChange={e => setSearchKeyword(e.target.value)}
+          style={{ padding: '10px', width: '250px', borderRadius: '5px', border: '1px solid #ccc' }}
         />
-        <button onClick={handleSearch} style={{ marginLeft: '10px' }}>Search</button>
+        <button onClick={handleSearch} style={{ marginLeft: '10px', padding: '10px', borderRadius: '5px', backgroundColor: '#17a2b8', color: 'white', border: 'none' }}>
+          Search
+        </button>
       </div>
 
       {/* Tool List Table */}
-      <table border="1" cellPadding="10" style={{ width: '100%', borderCollapse: 'collapse' }}>
-        <thead style={{ backgroundColor: '#f0f0f0' }}>
-          <tr>
-            <th>Name</th>
-            <th>Category</th>
-            <th>Price/Day</th>
-            <th>Quantity</th>
-            <th>Available</th>
-            <th>Image</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {tools.map(tool => (
-            <tr key={tool.id}>
-              <td>{tool.name}</td>
-              <td>{tool.category}</td>
-              <td>Rs. {tool.pricePerDay}</td>
-              <td>{tool.quantity}</td>
-              <td>{tool.isAvailable ? "Yes" : "No"}</td>
-              <td><img src={tool.imageUrl} alt="tool" width="50" /></td>
-              <td>
-                <button onClick={() => handleEdit(tool)} style={{ marginRight: '5px' }}>Edit</button>
-                <button onClick={() => handleDelete(tool.id)} style={{ backgroundColor: 'red', color: 'white' }}>Delete</button>
-              </td>
+      <div style={{ overflowX: 'auto' }}>
+        <table style={{ width: '100%', borderCollapse: 'collapse', boxShadow: '0 0 5px rgba(0,0,0,0.1)' }}>
+          <thead style={{ backgroundColor: '#343a40', color: 'white' }}>
+            <tr>
+              <th>Name</th>
+              <th>Category</th>
+              <th>Price/Day</th>
+              <th>Quantity</th>
+              <th>Available</th>
+              <th>Image</th>
+              <th>Actions</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {tools.map(tool => (
+              <tr key={tool.id} style={{ backgroundColor: '#fff', textAlign: 'center', transition: '0.3s' }}>
+                <td>{tool.name}</td>
+                <td>{tool.category}</td>
+                <td>Rs. {tool.pricePerDay}</td>
+                <td>{tool.quantity}</td>
+                <td>{tool.isAvailable ? "✅" : "❌"}</td>
+                <td><img src={tool.imageUrl} alt="tool" width="50" style={{ borderRadius: '5px' }} /></td>
+                <td>
+                  <button onClick={() => handleEdit(tool)} style={{ marginRight: '5px', backgroundColor: '#ffc107', color: '#333', padding: '5px 10px', border: 'none', borderRadius: '5px' }}>
+                    Edit
+                  </button>
+                  <button onClick={() => handleDelete(tool.id)} style={{ backgroundColor: '#dc3545', color: 'white', padding: '5px 10px', border: 'none', borderRadius: '5px' }}>
+                    Delete
+                  </button>
+                </td>
+              </tr>
+            ))}
+            {tools.length === 0 && (
+              <tr>
+                <td colSpan="7" style={{ padding: '20px', textAlign: 'center' }}>No tools found.</td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 };
