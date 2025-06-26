@@ -9,7 +9,7 @@ import Contact from './pages/contact';
 import Login from './pages/login';
 import Register from './pages/register';
 import Rent from './pages/Rent';
-import Dashboard from './pages/AdminDashboard';
+//import Dashboard from './pages/AdminDashboard';
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -34,7 +34,7 @@ function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/rent/:id" element={<Rent />} />
-            <Route path="/dashboard" element={<Dashboard />} />
+           
           </Routes>
         </div>
         <Footer />
